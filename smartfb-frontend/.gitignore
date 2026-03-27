@@ -26,4 +26,5 @@ dist-ssr
 
 .github/*
 .claude/*
-
+CLAUDE.md
+src/docs/plans/*

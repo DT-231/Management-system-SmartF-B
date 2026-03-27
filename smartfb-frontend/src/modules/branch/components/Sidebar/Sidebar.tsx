@@ -1,19 +1,33 @@
 import { type FC, useState } from 'react';
 import { useLocation } from 'react-router-dom';
-import { Package, LogOut } from 'lucide-react';
+import { Package, LogOut, ChevronDown } from 'lucide-react';
 import { usePermission } from '@shared/hooks/usePermission';
 import { menuConfig, type MenuItem } from '@/data';
 import { CollapsibleMenuItem } from './CollapsibleMenuItem';
 import { SubMenuItem } from './SubMenuItem';
+import { cn } from '@shared/utils/cn';
 
 /**
  * Sidebar component - menu điều hướng bên trái
  */
-export const Sidebar: FC = () => {
+interface SidebarProps {
+  branches?: { id: string; name: string }[];
+  selectedBranchId?: string;
+  onBranchChange?: (branchId: string) => void;
+}
+
+export const Sidebar: FC<SidebarProps> = ({
+  branches = [],
+  selectedBranchId,
+  onBranchChange,
+}) => {
   const location = useLocation();
   const { userRole } = usePermission();
 
   const [expandedItems, setExpandedItems] = useState<Set<string>>(new Set());
+  const [isBranchDropdownOpen, setIsBranchDropdownOpen] = useState(false);
+
+  const selectedBranch = branches.find((b) => b.id === selectedBranchId);
 
   const toggleItem = (title: string) => {
     setExpandedItems((prev) => {
@@ -42,6 +56,76 @@ export const Sidebar: FC = () => {
           <span className="text-white font-bold text-lg">F</span>
         </div>
         <span className="text-xl font-bold text-orange-500">SmartF&B</span>
+      </div>
+
+      {/* Branch Selector */}
+      <div className="px-3 py-3 ">
+        <div className="relative">
+          <button
+            onClick={() => setIsBranchDropdownOpen(!isBranchDropdownOpen)}
+            onBlur={() => setTimeout(() => setIsBranchDropdownOpen(false), 200)}
+            className={cn(
+              'w-full flex items-center gap-2 px-3 py-2 rounded-4xl border-1 transition-all duration-150',
+              'text-sm font-medium',
+              isBranchDropdownOpen
+                ? 'bg-slate-50 border-slate-400 shadow-sm'
+                : 'bg-white border-slate-300 hover:border-slate-400 hover:shadow-sm'
+            )}
+          >
+            <span className="text-slate-700 truncate flex-1 text-left">
+              {selectedBranch?.name || 'Tất cả chi nhánh'}
+            </span>
+            <ChevronDown
+              className={cn(
+                'w-4 h-4 text-slate-500 transition-transform duration-200',
+                isBranchDropdownOpen && 'rotate-180'
+              )}
+            />
+          </button>
+
+          {isBranchDropdownOpen && (
+            <div className="absolute left-0 right-0 mt-2 bg-white border border-slate-200 rounded-xl shadow-lg py-2 z-50 max-h-64 overflow-y-auto">
+              {/* Option "Tất cả chi nhánh" */}
+              <button
+                onClick={() => {
+                  onBranchChange?.('all');
+                  setIsBranchDropdownOpen(false);
+                }}
+                className={cn(
+                  'w-full text-left px-4 py-2.5 text-sm transition-colors duration-150',
+                  !selectedBranchId || selectedBranchId === 'all'
+                    ? 'bg-orange-50 text-orange-600 font-semibold'
+                    : 'text-slate-700 hover:bg-slate-50'
+                )}
+              >
+                Tất cả chi nhánh
+              </button>
+
+              {branches.length > 0 && (
+                <div className="border-t border-slate-100 my-1" />
+              )}
+
+              {/* Danh sách các chi nhánh */}
+              {branches.map((branch) => (
+                <button
+                  key={branch.id}
+                  onClick={() => {
+                    onBranchChange?.(branch.id);
+                    setIsBranchDropdownOpen(false);
+                  }}
+                  className={cn(
+                    'w-full text-left px-4 py-2.5 text-sm truncate transition-colors duration-150',
+                    selectedBranchId === branch.id
+                      ? 'bg-orange-50 text-orange-600 font-semibold'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  )}
+                >
+                  {branch.name}
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Navigation */}

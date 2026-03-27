@@ -1,14 +1,10 @@
-import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Building2, CircleCheckBig, CircleDollarSign } from "lucide-react";
 import { mockBranchDetails } from "@modules/branch/data/branchDetails";
-import { mockActivityLogs } from "@modules/branch/data/activityLogs";
 import { useBranchFilters } from "@modules/branch/hooks/useBranchFilters";
-import { useCreateBranch } from "@modules/branch/hooks/useCreateBranch";
 import { BranchFilterBar } from '@modules/branch/components/BranchFilterBar';
 import { BranchTable } from '@modules/branch/components/BranchTable';
-import { ActivityLogSection } from "@modules/branch/components/ActivityLogSection";
-import { CreateBranchDialog } from "@modules/branch/components/CreateBranchDialog";
-import type { CreateBranchFormData } from "@modules/branch/types/branch.types";
+import { ROUTES } from "@shared/constants/routes";
 
 interface StatCardProps {
   icon: React.ReactNode;
@@ -34,14 +30,14 @@ const StatCard = ({ icon, iconBg, label, value, valueColor = "text-gray-900" }: 
  * Page quản lý chi nhánh
  */
 export default function BranchesPage() {
-  const [createDialogOpen, setCreateDialogOpen] = useState(false);
-  const { mutate: createBranch } = useCreateBranch();
+  const navigate = useNavigate();
 
   const {
     filters,
     pagination,
     locations,
     branches,
+    totalItems,
     hasActiveFilters,
     updateFilter,
     clearFilters,
@@ -54,15 +50,7 @@ export default function BranchesPage() {
   const todayRevenue = 25500000;
 
   const handleAddBranch = () => {
-    setCreateDialogOpen(true);
-  };
-
-  const handleSubmitBranch = (data: CreateBranchFormData) => {
-    createBranch(data, {
-      onSuccess: () => {
-        setCreateDialogOpen(false);
-      },
-    });
+    navigate(ROUTES.OWNER.BRANCHES_NEW);
   };
 
   return (
@@ -108,19 +96,10 @@ export default function BranchesPage() {
           branches={branches}
           currentPage={pagination.page}
           totalPages={totalPages}
+          totalItems={totalItems}
           onPageChange={updatePage}
         />
       </div>
-
-      {/* Activity Log */}
-      <ActivityLogSection logs={mockActivityLogs} />
-
-      {/* Create Branch Dialog */}
-      <CreateBranchDialog 
-        open={createDialogOpen} 
-        onOpenChange={setCreateDialogOpen}
-        onSubmit={handleSubmitBranch}
-      />
     </div>
   );
 }

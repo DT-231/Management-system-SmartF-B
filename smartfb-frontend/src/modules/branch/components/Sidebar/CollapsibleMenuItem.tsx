@@ -56,7 +56,7 @@ export const CollapsibleMenuItem: FC<CollapsibleItemProps> = ({
 
   return (
     <button onClick={handleClick} className={cn(baseClasses, 'w-full text-left')}>
-      <span className="flex-1">{item.title}</span>
+      <span className="flex-1 text-md">{item.title}</span>
       {hasChildren && (
         <ChevronDown
           className={cn(

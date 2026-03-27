@@ -1,8 +1,10 @@
 import { useState } from 'react';
+import { ChevronDown } from 'lucide-react';
 import { Checkbox } from '@shared/components/ui/checkbox';
 import { Label } from '@shared/components/ui/label';
 import { Switch } from '@shared/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@shared/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@shared/components/ui/collapsible';
 import type { Step2OperationsData, DayOfWeek, WorkingHours, WorkingSchedule } from '@modules/branch/types/branch.types';
 
 interface Step2OperationsProps {
@@ -54,6 +56,7 @@ export const Step2Operations = ({ data, onChange }: Step2OperationsProps) => {
   const workingSchedule: Partial<WorkingSchedule> = data.workingSchedule || {};
   const integrations = data.integrations || { grabfood: false, shopeefood: false };
   const [syncEnabled, setSyncEnabled] = useState(false);
+  const [integrationsOpen, setIntegrationsOpen] = useState(false);
 
   const handleDayToggle = (day: DayOfWeek, enabled: boolean) => {
     const currentDay = workingSchedule[day] || { enabled: false, openTime: '07:00', closeTime: '22:30' };
@@ -202,37 +205,45 @@ export const Step2Operations = ({ data, onChange }: Step2OperationsProps) => {
 
       {/* Cài đặt tích hợp */}
       <div className="pt-2">
-        <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide mb-3">CÀI ĐẶT TÍCH HỢP</h3>
-        <div className="space-y-2">
-          {integrationPlatforms.map((platform) => {
-            const isEnabled = integrations[platform.id];
+        <Collapsible open={integrationsOpen} onOpenChange={setIntegrationsOpen}>
+          <CollapsibleTrigger className="w-full flex items-center justify-between group p-2 rounded-lg transition-colors">
+            <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">CÀI ĐẶT TÍCH HỢP</h3>
+            <ChevronDown className={`w-4 h-4 text-gray-500 transition-transform ${integrationsOpen ? 'rotate-180' : ''}`} />
+          </CollapsibleTrigger>
+          
+          <CollapsibleContent className="mt-3">
+            <div className="space-y-2">
+              {integrationPlatforms.map((platform) => {
+                const isEnabled = integrations[platform.id];
 
-            return (
-              <div
-                key={platform.id}
-                className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-white hover:border-gray-300 transition-colors"
-              >
-                <div className="flex items-center gap-3">
+                return (
                   <div
-                    className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
-                      platform.id === 'grabfood' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
-                    }`}
+                    key={platform.id}
+                    className="flex items-center justify-between p-3 rounded-lg border border-gray-200 bg-white hover:border-gray-300 transition-colors"
                   >
-                    {platform.id === 'grabfood' ? 'G' : 'S'}
+                    <div className="flex items-center gap-3">
+                      <div
+                        className={`w-10 h-10 rounded-lg flex items-center justify-center text-lg font-bold ${
+                          platform.id === 'grabfood' ? 'bg-green-100 text-green-600' : 'bg-orange-100 text-orange-600'
+                        }`}
+                      >
+                        {platform.id === 'grabfood' ? 'G' : 'S'}
+                      </div>
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{platform.name}</p>
+                        <p className="text-xs text-gray-500">{platform.description}</p>
+                      </div>
+                    </div>
+                    <Switch
+                      checked={isEnabled}
+                      onCheckedChange={(checked) => handleIntegrationToggle(platform.id, checked)}
+                    />
                   </div>
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{platform.name}</p>
-                    <p className="text-xs text-gray-500">{platform.description}</p>
-                  </div>
-                </div>
-                <Switch
-                  checked={isEnabled}
-                  onCheckedChange={(checked) => handleIntegrationToggle(platform.id, checked)}
-                />
-              </div>
-            );
-          })}
-        </div>
+                );
+              })}
+            </div>
+          </CollapsibleContent>
+        </Collapsible>
       </div>
     </div>
   );

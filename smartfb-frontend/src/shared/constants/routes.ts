@@ -21,6 +21,7 @@ export const ROUTES = {
     STAFF: '/owner/staff',
     SCHEDULES: '/owner/schedules',
     BRANCHES: '/owner/branches',
+    BRANCHES_NEW: '/owner/branches/new',
     PROMOTIONS: '/owner/promotions',
     SUPPLIERS: '/owner/suppliers',
     REPORTS: '/owner/reports',

@@ -5,6 +5,8 @@ import { ROUTES } from '@shared/constants/routes';
 import { usePermission } from '@shared/hooks/usePermission';
 import { mockBranches } from '@/data';
 import BranchesPage from '@pages/owner/BranchesPage';
+import BranchDetailPage from '@pages/owner/BranchDetailPage';
+import CreateBranchPage from '@pages/owner/CreateBranchPage';
 
 // Placeholder pages - will be created later
 const DashboardPage = () => <div className="p-4">Dashboard Page</div>;
@@ -57,6 +59,8 @@ function App() {
     { path: ROUTES.OWNER.STAFF, element: <StaffPage />, pageTitle: 'Quản lý nhân viên' },
     { path: ROUTES.OWNER.SCHEDULES, element: <SchedulesPage />, pageTitle: 'Lịch làm việc' },
     { path: ROUTES.OWNER.BRANCHES, element: <BranchesPage />, pageTitle: 'Quản lý chi nhánh' },
+    { path: `${ROUTES.OWNER.BRANCHES}/new`, element: <CreateBranchPage />, pageTitle: 'Tạo chi nhánh mới' },
+    { path: `${ROUTES.OWNER.BRANCHES}/:id`, element: <BranchDetailPage />, pageTitle: 'Chi tiết chi nhánh' },
     { path: ROUTES.OWNER.PROMOTIONS, element: <PromotionsPage />, pageTitle: 'Khuyến mãi' },
     { path: ROUTES.OWNER.SUPPLIERS, element: <SuppliersPage />, pageTitle: 'Nhà cung cấp' },
     { path: ROUTES.OWNER.REPORTS, element: <ReportsPage />, pageTitle: 'Báo cáo' },
