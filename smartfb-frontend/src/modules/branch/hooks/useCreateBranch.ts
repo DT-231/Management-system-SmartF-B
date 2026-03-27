@@ -1,4 +1,5 @@
-import { useMutation } from '@tanstack/react-query';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { useToast } from '@shared/hooks/useToast';
 import type { CreateBranchFormData } from '../types/branch.types';
 
 /**
@@ -6,18 +7,19 @@ import type { CreateBranchFormData } from '../types/branch.types';
  * TODO: Thay thế mock API bằng real API service khi backend sẵn sàng
  */
 export const useCreateBranch = () => {
-  console.log("useCreateBranch" );
+  const queryClient = useQueryClient();
+  const { success, error } = useToast();
 
   return useMutation({
     mutationFn: async (data: CreateBranchFormData) => {
       // TODO: Replace với real API call
       // return branchService.create(data);
-      
+
       // Mock API delay
       await new Promise(resolve => setTimeout(resolve, 1000));
-      
+
       console.log('Creating branch with data:', data);
-      
+
       // Mock response
       return {
         success: true,
@@ -31,18 +33,12 @@ export const useCreateBranch = () => {
     },
     onSuccess: (response) => {
       // Invalidate queries để refetch danh sách chi nhánh
-      // queryClient.invalidateQueries({ queryKey: ['branches'] });
-      
-      console.log('Branch created successfully:', response.data);
-      
-      // TODO: Show toast notification
-      // toast({ title: 'Tạo chi nhánh thành công', variant: 'success' });
+      queryClient.invalidateQueries({ queryKey: ['branches'] });
     },
-    onError: (error) => {
-      console.error('Failed to create branch:', error);
-      
-      // TODO: Show error toast
-      // toast({ title: 'Có lỗi xảy ra', description: error.message, variant: 'destructive' });
+    onError: (err) => {
+      console.error('Failed to create branch:', err);
+      const errorMessage = err instanceof Error ? err.message : 'Vui lòng thử lại sau';
+      error('Không thể tạo chi nhánh', errorMessage);
     },
   });
 };

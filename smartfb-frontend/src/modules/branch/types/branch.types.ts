@@ -92,3 +92,17 @@ export type CreateBranchFormData = Step1BasicInfoData & Step2OperationsData & St
 
 // Form values type (all fields optional for partial form updates)
 export type CreateBranchFormValues = Partial<CreateBranchFormData>;
+
+// Edit branch types - chỉ edit được những fields cơ bản
+export type EditBranchFormData = {
+  name: string;
+  code: string;
+  taxCode: string;
+  address: string;
+  city: string;
+  phone: string;
+  openTime: string;
+  closeTime: string;
+  managerId?: string;
+  isOpened?: boolean;
+};

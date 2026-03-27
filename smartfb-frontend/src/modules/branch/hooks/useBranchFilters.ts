@@ -102,6 +102,7 @@ export const useBranchFilters = (branches: BranchDetail[]) => {
     pagination,
     locations,
     branches: paginatedBranches,
+    totalItems,
     hasActiveFilters,
     updateFilter,
     clearFilters,

@@ -13,6 +13,7 @@ interface BranchTableProps {
   branches: BranchListItem[];
   currentPage: number;
   totalPages: number;
+  totalItems?: number;
   onPageChange: (page: number) => void;
   isLoading?: boolean;
 }
@@ -24,6 +25,7 @@ export const BranchTable = ({
   branches,
   currentPage,
   totalPages,
+  totalItems = 0,
   onPageChange,
   isLoading = false,
 }: BranchTableProps) => {
@@ -68,6 +70,7 @@ export const BranchTable = ({
       <BranchTablePagination
         currentPage={currentPage}
         totalPages={totalPages}
+        totalItems={totalItems}
         onPageChange={onPageChange}
       />
     </div>
