@@ -33,10 +33,10 @@ public class BranchController {
      * Cần quyền MANAGE_BRANCH hoặc VIEW_BRANCH.
      */
     @GetMapping
-    @PreAuthorize("hasPermission('MANAGE_BRANCH') or hasPermission('VIEW_BRANCH')")
+    @PreAuthorize("hasPermission(null, 'BRANCH_EDIT')")
     public ResponseEntity<ApiResponse<List<BranchResponse>>> getAllBranches() {
         UUID tenantId = TenantContext.getCurrentTenantId();
-        return ResponseEntity.ok(ApiResponse.ok(
+         return ResponseEntity.ok(ApiResponse.ok(
                 branchService.getAllBranchesByTenant(tenantId)
         ));
     }
@@ -46,7 +46,7 @@ public class BranchController {
      * Cần quyền MANAGE_BRANCH. Logic validate quota gói cước được xử lý tại Service.
      */
     @PostMapping
-    @PreAuthorize("hasPermission('MANAGE_BRANCH')")
+    @PreAuthorize("hasPermission(null, 'BRANCH_EDIT')")
     public ResponseEntity<ApiResponse<BranchResponse>> createBranch(@Valid @RequestBody BranchRequest request) {
         UUID tenantId = TenantContext.getCurrentTenantId();
         BranchResponse branch = branchService.createBranch(tenantId, request);
@@ -59,7 +59,7 @@ public class BranchController {
      * Chỉnh sửa thông tin chi nhánh.
      */
     @PutMapping("/{branchId}")
-    @PreAuthorize("hasPermission('MANAGE_BRANCH')")
+    @PreAuthorize("hasPermission(null, 'BRANCH_EDIT')")
     public ResponseEntity<ApiResponse<BranchResponse>> updateBranch(
             @PathVariable UUID branchId, 
             @Valid @RequestBody BranchRequest request) {
@@ -75,7 +75,7 @@ public class BranchController {
      * Quyền: OWNER hoặc MANAGE_BRANCH.
      */
     @PostMapping("/{branchId}/users")
-    @PreAuthorize("hasPermission('MANAGE_BRANCH')")
+    @PreAuthorize("hasPermission(null, 'BRANCH_EDIT')")
     public ResponseEntity<ApiResponse<Void>> assignUserToBranch(
             @PathVariable UUID branchId,
             @Valid @RequestBody com.smartfnb.branch.application.dto.AssignUserRequest request) {

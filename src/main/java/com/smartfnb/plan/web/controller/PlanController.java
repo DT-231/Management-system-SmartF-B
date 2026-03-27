@@ -43,7 +43,7 @@ public class PlanController {
      * Tạo mới gói dịch vụ. Yêu cầu SYSTEM_ADMIN.
      */
     @PostMapping
-    @PreAuthorize("hasPermission('SYSTEM_ADMIN')")
+    @PreAuthorize("hasPermission(null, 'SYSTEM_ADMIN')")
     public ResponseEntity<ApiResponse<PlanResponse>> createPlan(@Valid @RequestBody PlanRequest request) {
         PlanResponse plan = planService.createPlan(request);
         return ResponseEntity.status(HttpStatus.CREATED).body(

@@ -8,6 +8,12 @@ import com.smartfnb.auth.infrastructure.persistence.TenantRepository;
 import com.smartfnb.auth.infrastructure.persistence.UserJpaEntity;
 import com.smartfnb.auth.infrastructure.persistence.UserRepository;
 import com.smartfnb.rbac.infrastructure.persistence.PermissionJpaEntity;
+import com.smartfnb.rbac.infrastructure.persistence.RoleJpaEntity;
+import com.smartfnb.rbac.infrastructure.persistence.RoleJpaRepository;
+import com.smartfnb.rbac.infrastructure.persistence.UserRoleJpaEntity;
+import com.smartfnb.rbac.infrastructure.persistence.UserRoleJpaRepository;
+import com.smartfnb.rbac.infrastructure.persistence.RolePermissionJpaEntity;
+import com.smartfnb.rbac.infrastructure.persistence.RolePermissionJpaRepository;
 import com.smartfnb.rbac.infrastructure.persistence.PermissionRepository;
 import com.smartfnb.shared.exception.SmartFnbException;
 import lombok.RequiredArgsConstructor;
@@ -48,7 +54,10 @@ public class RegisterTenantCommandHandler {
     private final PasswordEncoder          passwordEncoder;
     private final JwtService               jwtService;
     private final ApplicationEventPublisher eventPublisher;
-    private final PermissionRepository     permissionRepository;
+    private final PermissionRepository           permissionRepository;
+    private final RoleJpaRepository              roleJpaRepository;
+    private final UserRoleJpaRepository          userRoleJpaRepository;
+    private final RolePermissionJpaRepository    rolePermissionJpaRepository;
 
     /**
      * Thực thi đăng ký tenant mới.
@@ -100,11 +109,37 @@ public class RegisterTenantCommandHandler {
         user = userRepository.save(user);
         UUID userId = user.getId();
 
-        // 5. Tạo JWT ngay — role OWNER, lấy tất cả quyền (full permissions)
+        // 5. Tạo Role OWNER mặc định cho Tenant
+        var ownerRole = RoleJpaEntity.builder()
+                .tenantId(tenantId)
+                .name("OWNER")
+                .description("Quyền quản trị cao nhất (Chủ quán)")
+                .isSystem(true)
+                .build();
+        ownerRole = roleJpaRepository.save(ownerRole);
+        UUID roleId = ownerRole.getId();
+
+        // 6. Gán Role OWNER cho User vừa tạo
+        var userRole = UserRoleJpaEntity.builder()
+                .userId(userId)
+                .roleId(roleId)
+                .build();
+        userRoleJpaRepository.save(userRole);
+
+        // 7. Gán toàn bộ Permissions cho Role OWNER
         List<String> allPermissionCodes = permissionRepository.findAll().stream()
                 .map(PermissionJpaEntity::getId)
                 .toList();
-                
+
+        List<RolePermissionJpaEntity> rolePermissions = allPermissionCodes.stream()
+                .map(code -> RolePermissionJpaEntity.builder()
+                        .roleId(roleId)
+                        .permissionId(code)
+                        .build())
+                .toList();
+        rolePermissionJpaRepository.saveAll(rolePermissions);
+
+        // 8. Tạo JWT ngay — role OWNER, lấy tất cả quyền (full permissions)
         String accessToken  = jwtService.generateAccessToken(userId, tenantId, "OWNER",
                 allPermissionCodes, null);
         String refreshToken = jwtService.generateRefreshToken(userId);
