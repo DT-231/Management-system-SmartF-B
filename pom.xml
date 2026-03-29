@@ -45,6 +45,14 @@
         </dependency>
 
         <!-- =========================================================
+             SPRING WEBSOCKET — Realtime sơ đồ bàn + trạng thái đơn hàng
+             ========================================================= -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-websocket</artifactId>
+        </dependency>
+
+        <!-- =========================================================
              SPRING SECURITY 6
              ========================================================= -->
         <dependency>

@@ -238,8 +238,10 @@ CREATE TABLE table_zones (
     id              UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     branch_id       UUID REFERENCES branches(id) ON DELETE CASCADE,
     name            VARCHAR(100) NOT NULL,   -- VD: "Tầng 1", "Sân thượng", "VIP"
-    floor_number    INT DEFAULT 1
+    floor_number    INT DEFAULT 1,
+    CONSTRAINT uq_zone_name_branch UNIQUE (branch_id, name)
 );
+CREATE INDEX idx_table_zones_branch ON table_zones(branch_id);
 
 -- Bàn trong chi nhánh
 CREATE TABLE tables (
@@ -259,6 +261,8 @@ CREATE TABLE tables (
     CONSTRAINT uq_table_name_zone UNIQUE (branch_id, zone_id, name)
 );
 CREATE INDEX idx_tables_branch_status ON tables(branch_id, status)
+    WHERE deleted_at IS NULL;
+CREATE INDEX idx_tables_branch_zone ON tables(branch_id, zone_id)
     WHERE deleted_at IS NULL;
 
 -- ==============================================================================
