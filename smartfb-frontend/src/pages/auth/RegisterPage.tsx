@@ -1,7 +1,9 @@
 import { useState } from 'react';
-import { useForm } from 'react-hook-form';
+import { useForm, useWatch } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import { Building2, Mail, Lock, User, Phone, Store, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, User, Phone, Store, Eye, EyeOff } from 'lucide-react';
+import { PageMeta } from '@shared/components/common/PageMeta';
+import { BrandLogo } from '@shared/components/layout/BrandLogo';
 import { Button } from '@shared/components/ui/button';
 import { Input } from '@shared/components/ui/input';
 import { Label } from '@shared/components/ui/label';
@@ -33,8 +35,8 @@ export default function RegisterPage() {
   const {
     register: registerForm,
     handleSubmit,
+    control,
     formState: { errors, touchedFields },
-    watch,
   } = useForm<RegisterFormValues>({
     defaultValues: {
       tenantName: '',
@@ -43,44 +45,54 @@ export default function RegisterPage() {
       phone: '',
       password: '',
       confirmPassword: '',
-      planSlug: 'free',
+      planSlug: 'trial',
     },
   });
 
-  const password = watch('password');
+  const password = useWatch({
+    control,
+    name: 'password',
+  });
 
   const onSubmit = (data: RegisterFormValues) => {
     register({
       tenantName: data.tenantName,
       ownerName: data.ownerName,
       email: data.email,
+      phone: data.phone,
       password: data.password,
       planSlug: data.planSlug,
     });
   };
 
   return (
-    <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center p-4">
-      <div className="w-full max-w-2xl">
-        {/* Logo + Title */}
-        <div className="text-center mb-8">
-          <div className="flex justify-center mb-4">
-            <div className="w-20 h-20 bg-[#e8692a] rounded-2xl flex items-center justify-center shadow-xl">
-              <Building2 className="w-12 h-12 text-white" />
-            </div>
+    <>
+      <PageMeta
+        title="Đăng ký"
+        description="Đăng ký SmartF&B để tạo tài khoản quản lý chuỗi quán, chi nhánh, thực đơn và vận hành F&B tập trung."
+        noIndex
+      />
+      <div className="min-h-screen bg-[#faf7f2] flex items-center justify-center p-4">
+        <div className="w-full max-w-2xl">
+          {/* Logo + Title */}
+          <div className="text-center mb-8">
+            <h1 className="sr-only">Đăng ký SmartF&amp;B</h1>
+            <BrandLogo
+              className="justify-center mb-4 gap-3"
+              iconClassName="h-16 w-16 drop-shadow-lg"
+              textClassName="text-4xl text-[#1a1a1a]"
+            />
+            <p className="text-[#7a7a7a]">Tạo tài khoản quản lý chuỗi quán của bạn</p>
           </div>
-          <h1 className="text-3xl font-bold text-[#1a1a1a] mb-2">Đăng ký SmartF&B</h1>
-          <p className="text-[#7a7a7a]">Tạo tài khoản quản lý chuỗi quán của bạn</p>
-        </div>
 
-        {/* Register Form */}
-        <div className="bg-white rounded-2xl shadow-lg border border-[#f0ebe3] p-8">
-          <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
-            {/* Business Info Section */}
-            <div className="space-y-4">
-              <h3 className="text-lg font-semibold text-[#1a1a1a] border-b border-[#f0ebe3] pb-2">
-                Thông tin doanh nghiệp
-              </h3>
+          {/* Register Form */}
+          <div className="bg-white rounded-2xl shadow-lg border border-[#f0ebe3] p-8">
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
+              {/* Business Info Section */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-semibold text-[#1a1a1a] border-b border-[#f0ebe3] pb-2">
+                  Thông tin doanh nghiệp
+                </h3>
 
               {/* Tenant Name */}
               <div className="space-y-2">
@@ -224,7 +236,7 @@ export default function RegisterPage() {
                   <Input
                     id="password"
                     type={showPassword ? 'text' : 'password'}
-                    placeholder="Ít nhất 6 ký tự"
+                    placeholder="Ít nhất 8 ký tự"
                     className={cn(
                       'pl-11 pr-11 h-12 border-[#f0ebe3] focus:border-[#e8692a]',
                       touchedFields.password && errors.password && 'border-red-500 focus:border-red-500'
@@ -232,8 +244,8 @@ export default function RegisterPage() {
                     {...registerForm('password', {
                       required: 'Mật khẩu không được để trống',
                       minLength: {
-                        value: 6,
-                        message: 'Mật khẩu phải có ít nhất 6 ký tự',
+                        value: 8,
+                        message: 'Mật khẩu phải có ít nhất 8 ký tự',
                       },
                     })}
                   />
@@ -295,61 +307,62 @@ export default function RegisterPage() {
                   className="w-full h-12 px-4 border border-[#f0ebe3] rounded-md focus:outline-none focus:ring-2 focus:ring-[#e8692a] focus:border-transparent"
                   {...registerForm('planSlug')}
                 >
-                  <option value="free">Miễn phí (Free)</option>
-                  <option value="starter">Khởi đầu (Starter)</option>
-                  <option value="pro">Chuyên nghiệp (Pro)</option>
-                  <option value="enterprise">Doanh nghiệp (Enterprise)</option>
+                  <option value="trial">Dùng thử 7 ngày (Trial)</option>
+                  <option value="basic">Cơ bản (Basic)</option>
+                  <option value="standard">Tiêu chuẩn (Standard)</option>
+                  <option value="premium">Nâng cao (Premium)</option>
                 </select>
                 <p className="text-xs text-[#7a7a7a]">Bạn có thể nâng cấp gói dịch vụ sau này</p>
               </div>
             </div>
 
-            {/* Submit Button */}
-            <Button
-              type="submit"
-              className="w-full h-12 bg-[#e8692a] hover:bg-[#d1551f] text-white font-semibold text-base shadow-lg transition-all duration-200"
-              disabled={isPending}
-            >
-              {isPending ? (
-                <div className="flex items-center gap-2">
-                  <div className="spinner spinner-sm" />
-                  Đang đăng ký...
-                </div>
-              ) : (
-                'Đăng ký ngay'
-              )}
-            </Button>
-          </form>
-
-          {/* Divider */}
-          <div className="relative my-6">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-[#f0ebe3]" />
-            </div>
-            <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white text-[#7a7a7a]">Hoặc</span>
-            </div>
-          </div>
-
-          {/* Login Link */}
-          <div className="text-center">
-            <p className="text-sm text-[#7a7a7a]">
-              Đã có tài khoản?{' '}
-              <Link
-                to="/login"
-                className="text-[#e8692a] hover:text-[#d1551f] font-semibold transition-colors"
+              {/* Submit Button */}
+              <Button
+                type="submit"
+                className="w-full h-12 bg-[#e8692a] hover:bg-[#d1551f] text-white font-semibold text-base shadow-lg transition-all duration-200"
+                disabled={isPending}
               >
-                Đăng nhập ngay
-              </Link>
-            </p>
-          </div>
-        </div>
+                {isPending ? (
+                  <div className="flex items-center gap-2">
+                    <div className="spinner spinner-sm" />
+                    Đang đăng ký...
+                  </div>
+                ) : (
+                  'Đăng ký ngay'
+                )}
+              </Button>
+            </form>
 
-        {/* Footer */}
-        <p className="text-center text-sm text-[#7a7a7a] mt-8">
-          © 2026 SmartF&B. Nền tảng quản lý chuỗi F&B
-        </p>
+            {/* Divider */}
+            <div className="relative my-6">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-[#f0ebe3]" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-4 bg-white text-[#7a7a7a]">Hoặc</span>
+              </div>
+            </div>
+
+            {/* Login Link */}
+            <div className="text-center">
+              <p className="text-sm text-[#7a7a7a]">
+                Đã có tài khoản?{' '}
+                <Link
+                  to="/login"
+                  className="text-[#e8692a] hover:text-[#d1551f] font-semibold transition-colors"
+                >
+                  Đăng nhập ngay
+                </Link>
+              </p>
+            </div>
+          </div>
+
+          {/* Footer */}
+          <p className="text-center text-sm text-[#7a7a7a] mt-8">
+            © 2026 SmartF&B. Nền tảng quản lý chuỗi F&B
+          </p>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
