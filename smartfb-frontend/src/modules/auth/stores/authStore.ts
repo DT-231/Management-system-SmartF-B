@@ -1,65 +1,114 @@
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-import type { User } from '../types/auth.types';
-
-/**
- * Auth Store - Manages authentication state globally
- * Persisted to localStorage
- */
-
-interface AuthStore {
-  user: User | null;
-  isAuthenticated: boolean;
-
-  // Actions
-  setUser: (user: User | null) => void;
-  setTokens: (accessToken: string, refreshToken: string) => void;
-  logout: () => void;
-  updateUser: (updates: Partial<User>) => void;
-}
+import { createJSONStorage, persist } from 'zustand/middleware';
+import type { AuthStore } from '../types/authStore.types';
+import {
+  AUTH_STORAGE_KEY,
+  buildAuthProfile,
+  buildAuthSession,
+  buildAuthUser,
+  cleanupLegacyAuthStorage,
+  mergePersistedAuthState,
+  partializePersistedAuthState,
+} from '../utils/authStore.utils';
 
 export const useAuthStore = create<AuthStore>()(
   persist(
     (set) => ({
       user: null,
+      profile: null,
+      session: null,
       isAuthenticated: false,
+      hasHydrated: false,
 
-      setUser: (user) =>
-        set({
-          user,
-          isAuthenticated: !!user,
+      setAuthSession: (authResponse, context = {}) =>
+        set((state) => {
+          cleanupLegacyAuthStorage();
+
+          // Lấy permissions cũ làm fallback để tránh mất quyền UI
+          // nếu token mới không chứa đầy đủ claims như mong đợi.
+          const nextSession = buildAuthSession(authResponse, state.session?.permissions ?? []);
+          const nextProfile = buildAuthProfile(context, state.profile, state.user);
+
+          // `user` luôn được dựng lại từ `session + profile`
+          // để không phải persist trùng dữ liệu trong localStorage.
+          const nextUser = buildAuthUser(nextSession, nextProfile);
+
+          return {
+            profile: nextProfile,
+            session: nextSession,
+            user: nextUser,
+            isAuthenticated: true,
+          };
         }),
 
-      setTokens: (accessToken, refreshToken) => {
-        localStorage.setItem('access_token', accessToken);
-        localStorage.setItem('refresh_token', refreshToken);
-      },
-
-      logout: () => {
-        // Clear tokens from localStorage
-        localStorage.removeItem('access_token');
-        localStorage.removeItem('refresh_token');
-        localStorage.removeItem('tenant_id');
+      clearAuthSession: () => {
+        cleanupLegacyAuthStorage();
 
         set({
           user: null,
+          profile: null,
+          session: null,
           isAuthenticated: false,
         });
       },
 
       updateUser: (updates) =>
-        set((state) => ({
-          user: state.user ? { ...state.user, ...updates } : null,
-        })),
+        set((state) => {
+          if (!state.user) {
+            return {};
+          }
+
+          const nextProfile = buildAuthProfile(
+            {
+              email: updates.email,
+              fullName: updates.fullName,
+              phone: updates.phone,
+            },
+            state.profile,
+            state.user
+          );
+
+          return {
+            profile: nextProfile,
+            user: {
+              ...state.user,
+              ...updates,
+            },
+          };
+        }),
+
+      updateBranchContext: (branchId) =>
+        set((state) => {
+          if (!state.user || !state.session) {
+            return {};
+          }
+
+          return {
+            user: {
+              ...state.user,
+              branchId,
+            },
+            session: {
+              ...state.session,
+              branchId,
+            },
+          };
+        }),
+
+      setHydrated: (hasHydrated) =>
+        set({
+          hasHydrated,
+        }),
     }),
     {
-      name: 'auth-storage',
-      partialize: (state) => ({
-        user: state.user,
-        isAuthenticated: state.isAuthenticated,
-      }),
+      name: AUTH_STORAGE_KEY,
+      storage: createJSONStorage(() => localStorage),
+      partialize: partializePersistedAuthState,
+      merge: mergePersistedAuthState,
+      onRehydrateStorage: () => (state) => {
+        cleanupLegacyAuthStorage();
+        state?.setHydrated(true);
+      },
     }
   )
 );
-
-
