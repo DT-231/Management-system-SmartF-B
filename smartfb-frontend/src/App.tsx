@@ -1,100 +1,80 @@
-import { Routes, Route, Navigate } from 'react-router-dom';
-import { useState } from 'react';
-import { OwnerLayout } from '@shared/components/layout/Layout';
+import { AdminLayout, AppLayout } from '@/layouts';
+import { useAuthStore } from '@modules/auth/stores/authStore';
+import { ROLES } from '@shared/constants/roles';
 import { ROUTES } from '@shared/constants/routes';
-import { usePermission } from '@shared/hooks/usePermission';
-import { mockBranches } from '@/data';
-import BranchesPage from '@pages/owner/BranchesPage';
-import BranchDetailPage from '@pages/owner/BranchDetailPage';
-import CreateBranchPage from '@pages/owner/CreateBranchPage';
-import StaffPage from '@pages/owner/StaffPage';
-import CreateStaffPage from '@pages/owner/CreateStaffPage';
-import StaffDetailPage from '@pages/owner/StaffDetailPage';
-import TablesPage from '@pages/owner/TablesPage';
+import { getRoleHomePage } from '@shared/utils/getRoleHomePage';
+import { Navigate, Route, Routes } from 'react-router-dom';
+import {
+  adminRoutes,
+  ownerRoutes,
+  ProtectedRoute,
+  PublicRoute,
+  publicRoutes,
+  staffRoutes,
+  type RouteConfigItem,
+} from './routes';
 
-// Placeholder pages - will be created later
-const DashboardPage = () => <div className="p-4">Dashboard Page</div>;
-// const TablesPage = () => <div className="p-4">Tables Page</div>;
-const OrdersPage = () => <div className="p-4">Orders Page</div>;
-const RevenuePage = () => <div className="p-4">Revenue Page</div>;
-const MenuPage = () => <div className="p-4">Menu Page</div>;
-const InventoryPage = () => <div className="p-4">Inventory Page</div>;
-const RecipesPage = () => <div className="p-4">Recipes Page</div>;
-const SchedulesPage = () => <div className="p-4">Schedules Page</div>;
-const PromotionsPage = () => <div className="p-4">Promotions Page</div>;
-const SuppliersPage = () => <div className="p-4">Suppliers Page</div>;
-const ReportsPage = () => <div className="p-4">Reports Page</div>;
-const SettingsPage = () => <div className="p-4">Settings Page</div>;
-const PackagesPage = () => <div className="p-4">Packages Page</div>;
+const renderProtectedRoutes = (
+  routes: RouteConfigItem[],
+  allowedRoles: typeof ROLES[keyof typeof ROLES][],
+  layout: 'admin' | 'app'
+) => {
+  return routes.map(({ path, element, pageTitle }) => {
+    const wrappedElement =
+      layout === 'admin' ? (
+        <AdminLayout pageTitle={pageTitle}>{element}</AdminLayout>
+      ) : (
+        <AppLayout pageTitle={pageTitle}>{element}</AppLayout>
+      );
 
-interface OwnerRouteConfig {
-  path: string;
-  element: React.ReactNode;
-  pageTitle: string;
-}
+    return (
+      <Route
+        key={path}
+        path={path}
+        element={
+          <ProtectedRoute allowedRoles={allowedRoles}>
+            {wrappedElement}
+          </ProtectedRoute>
+        }
+      />
+    );
+  });
+};
 
 /**
- * Main App component with routing and layout
+ * App shell chịu trách nhiệm mount hệ thống routes.
  */
 function App() {
-  const { isOwner } = usePermission();
-  const [selectedBranchId, setSelectedBranchId] = useState<string>('all');
+  const hasHydrated = useAuthStore((state) => state.hasHydrated);
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const currentRole = useAuthStore((state) => state.user?.role);
 
-  // TODO: Replace with actual auth check
-  const isAuthenticated = true;
-
-  if (!isAuthenticated) {
-    return <Navigate to={ROUTES.LOGIN} replace />;
+  if (!hasHydrated) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#faf7f2] text-[#7a7a7a]">
+        Đang khôi phục phiên đăng nhập...
+      </div>
+    );
   }
 
-  const handleBranchChange = (branchId: string) => {
-    setSelectedBranchId(branchId);
-  };
-
-  const ownerRoutes: OwnerRouteConfig[] = [
-    { path: ROUTES.OWNER.DASHBOARD, element: <DashboardPage />, pageTitle: 'Dashboard' },
-    { path: ROUTES.OWNER.TABLES, element: <TablesPage />, pageTitle: 'Quản lý bàn' },
-    { path: ROUTES.OWNER.ORDERS, element: <OrdersPage />, pageTitle: 'Quản lý đơn hàng' },
-    { path: ROUTES.OWNER.REVENUE, element: <RevenuePage />, pageTitle: 'Báo cáo doanh thu' },
-    { path: ROUTES.OWNER.MENU, element: <MenuPage />, pageTitle: 'Quản lý thực đơn' },
-    { path: ROUTES.OWNER.INVENTORY, element: <InventoryPage />, pageTitle: 'Quản lý kho' },
-    { path: ROUTES.OWNER.RECIPES, element: <RecipesPage />, pageTitle: 'Công thức' },
-    { path: ROUTES.OWNER.STAFF, element: <StaffPage />, pageTitle: 'Quản lý nhân viên' },
-    { path: ROUTES.OWNER.STAFF_NEW, element: <CreateStaffPage />, pageTitle: 'Thêm nhân viên' },
-    { path: ROUTES.OWNER.STAFF_DETAIL, element: <StaffDetailPage />, pageTitle: 'Chi tiết nhân viên' },
-    { path: ROUTES.OWNER.SCHEDULES, element: <SchedulesPage />, pageTitle: 'Lịch làm việc' },
-    { path: ROUTES.OWNER.BRANCHES, element: <BranchesPage />, pageTitle: 'Quản lý chi nhánh' },
-    { path: `${ROUTES.OWNER.BRANCHES}/new`, element: <CreateBranchPage />, pageTitle: 'Tạo chi nhánh mới' },
-    { path: `${ROUTES.OWNER.BRANCHES}/:id`, element: <BranchDetailPage />, pageTitle: 'Chi tiết chi nhánh' },
-    { path: ROUTES.OWNER.PROMOTIONS, element: <PromotionsPage />, pageTitle: 'Khuyến mãi' },
-    { path: ROUTES.OWNER.SUPPLIERS, element: <SuppliersPage />, pageTitle: 'Nhà cung cấp' },
-    { path: ROUTES.OWNER.REPORTS, element: <ReportsPage />, pageTitle: 'Báo cáo' },
-    { path: ROUTES.OWNER.SETTINGS, element: <SettingsPage />, pageTitle: 'Cài đặt' },
-    { path: ROUTES.OWNER.PACKAGES, element: <PackagesPage />, pageTitle: 'Gói dịch vụ' },
-  ];
+  const fallbackRoute =
+    isAuthenticated && currentRole ? getRoleHomePage(currentRole) : ROUTES.LOGIN;
 
   return (
     <Routes>
-      {/* Owner Routes */}
-      {isOwner && ownerRoutes.map(({ path, element, pageTitle }) => (
+      {publicRoutes.map(({ path, element }) => (
         <Route
           key={path}
           path={path}
-          element={
-            <OwnerLayout
-              pageTitle={pageTitle}
-              branches={mockBranches}
-              selectedBranchId={selectedBranchId}
-              onBranchChange={handleBranchChange}
-            >
-              {element}
-            </OwnerLayout>
-          }
+          element={<PublicRoute>{element}</PublicRoute>}
         />
       ))}
 
-      {/* Default redirect */}
-      <Route path="*" element={<Navigate to={ROUTES.OWNER.DASHBOARD} replace />} />
+      {renderProtectedRoutes(adminRoutes, [ROLES.ADMIN], 'admin')}
+      {renderProtectedRoutes(ownerRoutes, [ROLES.OWNER], 'app')}
+      {renderProtectedRoutes(staffRoutes, [ROLES.STAFF], 'app')}
+
+      <Route path="*" element={<Navigate to={fallbackRoute} replace />} />
     </Routes>
   );
 }

@@ -27,4 +27,7 @@ dist-ssr
 .github/*
 .claude/*
 CLAUDE.md
-src/docs/plans/*
+src/docs/plans/
+workflows
+.gitignore
+AGENTS.md

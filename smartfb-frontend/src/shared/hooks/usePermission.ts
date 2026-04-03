@@ -1,40 +1,43 @@
+import { useAuthStore } from '@modules/auth/stores/authStore';
 import type { Role } from '../constants/roles';
 import { ROLES } from '../constants/roles';
 
 /**
- * Hook to check user permissions
- * TODO: Implement this after authStore is created
- * 
- * For now, this is a placeholder that returns mock data
+ * Hook lấy role và permission hiện tại từ auth store.
  */
-export function usePermission() {
-  // TODO: Get from authStore
-  const userRole: Role = ROLES.OWNER as Role; // Mock data
-  
+export const usePermission = () => {
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
+  const userRole = useAuthStore((state) => state.user?.role ?? ROLES.STAFF);
+  const permissions = useAuthStore((state) => state.session?.permissions ?? []);
+
   const isAdmin = userRole === ROLES.ADMIN;
   const isOwner = userRole === ROLES.OWNER;
   const isStaff = userRole === ROLES.STAFF;
-  
+
   /**
-   * Check if user has permission to perform an action
-   * @param _permission - Permission string to check
-   * @returns boolean
+   * Kiểm tra user hiện tại có quyền thao tác hay không.
+   *
+   * @param permission - Mã quyền theo backend như `STAFF_EDIT`, `MENU_VIEW`
    */
-  const can = (_permission: string): boolean => {
-    // TODO: Implement actual permission check
-    // This should check against user's permissions from backend
-    if (isAdmin) return true;
-    if (isOwner) return true;
-    
-    // Staff permissions would be checked here
-    return false;
+  const can = (permission: string): boolean => {
+    if (!isAuthenticated) {
+      return false;
+    }
+
+    if (isAdmin || isOwner) {
+      return true;
+    }
+
+    return permissions.includes(permission);
   };
-  
+
   return {
-    userRole,
+    userRole: userRole as Role,
+    permissions,
+    isAuthenticated,
     isAdmin,
     isOwner,
     isStaff,
     can,
   };
-}
+};
