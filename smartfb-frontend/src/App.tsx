@@ -7,16 +7,19 @@ import { mockBranches } from '@/data';
 import BranchesPage from '@pages/owner/BranchesPage';
 import BranchDetailPage from '@pages/owner/BranchDetailPage';
 import CreateBranchPage from '@pages/owner/CreateBranchPage';
+import StaffPage from '@pages/owner/StaffPage';
+import CreateStaffPage from '@pages/owner/CreateStaffPage';
+import StaffDetailPage from '@pages/owner/StaffDetailPage';
+import TablesPage from '@pages/owner/TablesPage';
 
 // Placeholder pages - will be created later
 const DashboardPage = () => <div className="p-4">Dashboard Page</div>;
-const TablesPage = () => <div className="p-4">Tables Page</div>;
+// const TablesPage = () => <div className="p-4">Tables Page</div>;
 const OrdersPage = () => <div className="p-4">Orders Page</div>;
 const RevenuePage = () => <div className="p-4">Revenue Page</div>;
 const MenuPage = () => <div className="p-4">Menu Page</div>;
 const InventoryPage = () => <div className="p-4">Inventory Page</div>;
 const RecipesPage = () => <div className="p-4">Recipes Page</div>;
-const StaffPage = () => <div className="p-4">Staff Management Page</div>;
 const SchedulesPage = () => <div className="p-4">Schedules Page</div>;
 const PromotionsPage = () => <div className="p-4">Promotions Page</div>;
 const SuppliersPage = () => <div className="p-4">Suppliers Page</div>;
@@ -57,6 +60,8 @@ function App() {
     { path: ROUTES.OWNER.INVENTORY, element: <InventoryPage />, pageTitle: 'Quản lý kho' },
     { path: ROUTES.OWNER.RECIPES, element: <RecipesPage />, pageTitle: 'Công thức' },
     { path: ROUTES.OWNER.STAFF, element: <StaffPage />, pageTitle: 'Quản lý nhân viên' },
+    { path: ROUTES.OWNER.STAFF_NEW, element: <CreateStaffPage />, pageTitle: 'Thêm nhân viên' },
+    { path: ROUTES.OWNER.STAFF_DETAIL, element: <StaffDetailPage />, pageTitle: 'Chi tiết nhân viên' },
     { path: ROUTES.OWNER.SCHEDULES, element: <SchedulesPage />, pageTitle: 'Lịch làm việc' },
     { path: ROUTES.OWNER.BRANCHES, element: <BranchesPage />, pageTitle: 'Quản lý chi nhánh' },
     { path: `${ROUTES.OWNER.BRANCHES}/new`, element: <CreateBranchPage />, pageTitle: 'Tạo chi nhánh mới' },

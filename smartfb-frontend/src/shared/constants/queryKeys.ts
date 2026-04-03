@@ -16,6 +16,13 @@ export const queryKeys = {
     list: (filters?: Record<string, unknown>) => ['branches', 'list', filters] as const,
     detail: (id: string) => ['branches', 'detail', id] as const,
   },
+
+  // Tables
+  tables: {
+    all: ['tables'] as const,
+    list: (filters?: Record<string, unknown>) => ['tables', 'list', filters] as const,
+    detail: (id: string) => ['tables', 'detail', id] as const,
+  },
   
   // Staff
   staff: {
