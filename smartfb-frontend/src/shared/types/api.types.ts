@@ -1,9 +1,20 @@
 /**
  * Common API Response types
  */
+/**
+ * Chi tiết lỗi theo contract backend SmartF&B.
+ * Backend trả lỗi trong object `error` thay vì field `message` ở root.
+ */
+export interface ApiErrorDetail {
+  code: string;
+  message: string;
+}
+
 export interface ApiResponse<T = unknown> {
   success: boolean;
   data: T;
+  error?: ApiErrorDetail | null;
+  timestamp?: number;
   message?: string;
 }
 
