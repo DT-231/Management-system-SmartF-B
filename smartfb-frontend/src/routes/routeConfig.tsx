@@ -4,6 +4,8 @@ import BranchDetailPage from '@pages/owner/BranchDetailPage';
 import BranchesPage from '@pages/owner/BranchesPage';
 import CreateBranchPage from '@pages/owner/CreateBranchPage';
 import MenuPage from '@pages/owner/MenuPage';
+import OrderPage from '@pages/pos/OrderPage';
+import PaymentPage from '@pages/pos/PaymentPage';
 import { PagePlaceholder } from '@shared/components/common/PagePlaceholder';
 import { ROUTES } from '@shared/constants/routes';
 
@@ -252,5 +254,18 @@ export const staffRoutes: RouteConfigItem[] = [
         description="Trang ca làm của nhân viên sẽ được thêm riêng ở bước triển khai module schedule."
       />
     ),
+  },
+];
+
+export const posRoutes: RouteConfigItem[] = [
+  {
+    path: ROUTES.POS_ORDER,
+    pageTitle: 'Đặt món',
+    element: <OrderPage />,
+  },
+  {
+    path: ROUTES.POS_PAYMENT,
+    pageTitle: 'Thanh toán',
+    element: <PaymentPage />,
   },
 ];

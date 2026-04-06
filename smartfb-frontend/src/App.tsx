@@ -7,6 +7,7 @@ import { Navigate, Route, Routes } from 'react-router-dom';
 import {
   adminRoutes,
   ownerRoutes,
+  posRoutes,
   ProtectedRoute,
   PublicRoute,
   publicRoutes,
@@ -73,6 +74,19 @@ function App() {
       {renderProtectedRoutes(adminRoutes, [ROLES.ADMIN], 'admin')}
       {renderProtectedRoutes(ownerRoutes, [ROLES.OWNER], 'app')}
       {renderProtectedRoutes(staffRoutes, [ROLES.STAFF], 'app')}
+      
+      {/* POS Routes - Custom full-screen layout */}
+      {posRoutes.map(({ path, element }) => (
+        <Route
+          key={path}
+          path={path}
+          element={
+            <div className="min-h-screen bg-[#faf7f2] p-4 font-sans antialiased text-slate-900 overflow-hidden">
+              {element}
+            </div>
+          }
+        />
+      ))}
 
       <Route path="*" element={<Navigate to={fallbackRoute} replace />} />
     </Routes>
