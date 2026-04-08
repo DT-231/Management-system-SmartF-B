@@ -6,6 +6,7 @@ import CreateBranchPage from '@pages/owner/CreateBranchPage';
 import MenuPage from '@pages/owner/MenuPage';
 import OrderPage from '@pages/pos/OrderPage';
 import PaymentPage from '@pages/pos/PaymentPage';
+import OrderManagementPage from '@pages/pos/OrderManagementPage';
 import { PagePlaceholder } from '@shared/components/common/PagePlaceholder';
 import { ROUTES } from '@shared/constants/routes';
 
@@ -267,5 +268,10 @@ export const posRoutes: RouteConfigItem[] = [
     path: ROUTES.POS_PAYMENT,
     pageTitle: 'Thanh toán',
     element: <PaymentPage />,
+  },
+  {
+    path: ROUTES.POS_MANAGEMENT,
+    pageTitle: 'Quản lý đơn hàng',
+    element: <OrderManagementPage />,
   },
 ];

@@ -17,8 +17,8 @@ import { Button } from '@/shared/components/ui/button';
 import { Input } from '@/shared/components/ui/input';
 import { useNavigate } from 'react-router-dom';
 import { ROUTES } from '@/shared/constants/routes';
+import { useOrderStore } from '@/modules/order/stores/orderStore';
 
-// Mock Data
 const CATEGORIES = [
   { id: 'all', name: 'Tất cả', icon: <ShoppingCart className="w-5 h-5" /> },
   { id: 'ca-phe', name: 'Cà phê', icon: <Coffee className="w-5 h-5" /> },
@@ -37,17 +37,19 @@ const MOCK_MENU_ITEMS = [
   { id: '6', name: 'Cà phê Đen Đá', price: 25000, category: 'ca-phe', image: 'https://images.unsplash.com/photo-1509042239860-f550ce710b93?q=80&w=200&h=200&auto=format&fit=crop' },
 ];
 
-interface CartItem {
-  id: string;
-  name: string;
-  price: number;
-  quantity: number;
-}
-
 const OrderPage: React.FC = () => {
   const [selectedCategory, setSelectedCategory] = useState('all');
   const [searchQuery, setSearchQuery] = useState('');
-  const [cart, setCart] = useState<CartItem[]>([]);
+  
+  const { 
+    cart, 
+    addToCart, 
+    removeFromCart, 
+    updateQuantity, 
+    placeOrder,
+    isLoading 
+  } = useOrderStore();
+  
   const navigate = useNavigate();
 
   const filteredItems = useMemo(() => {
@@ -58,37 +60,19 @@ const OrderPage: React.FC = () => {
     });
   }, [selectedCategory, searchQuery]);
 
-  const addToCart = (item: typeof MOCK_MENU_ITEMS[0]) => {
-    setCart(prev => {
-      const existing = prev.find(i => i.id === item.id);
-      if (existing) {
-        return prev.map(i => i.id === item.id ? { ...i, quantity: i.quantity + 1 } : i);
-      }
-      return [...prev, { id: item.id, name: item.name, price: item.price, quantity: 1 }];
-    });
-  };
-
-  const updateQuantity = (id: string, delta: number) => {
-    setCart(prev => prev.map(i => {
-      if (i.id === id) {
-        const newQty = Math.max(1, i.quantity + delta);
-        return { ...i, quantity: newQty };
-      }
-      return i;
-    }));
-  };
-
-  const removeFromCart = (id: string) => {
-    setCart(prev => prev.filter(i => i.id !== id));
-  };
-
   const subtotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
   const tax = subtotal * 0.08;
   const total = subtotal + tax;
 
+  const handlePlaceOrder = async () => {
+    const success = await placeOrder();
+    if (success) {
+      navigate(ROUTES.POS_PAYMENT);
+    }
+  };
+
   return (
     <div className="flex h-[calc(100vh-2rem)] gap-4 overflow-hidden">
-      {/* Category Sidebar */}
       <aside className="w-64 flex flex-col gap-2 bg-white rounded-3xl p-4 shadow-sm border border-slate-100">
         <h2 className="px-4 py-2 text-lg font-bold text-slate-800">Danh mục</h2>
         {CATEGORIES.map(cat => (
@@ -107,9 +91,7 @@ const OrderPage: React.FC = () => {
         ))}
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 flex flex-col gap-4 overflow-hidden">
-        {/* Header/Search */}
         <div className="bg-white rounded-3xl p-4 shadow-sm border border-slate-100 flex items-center gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400 w-5 h-5" />
@@ -122,7 +104,6 @@ const OrderPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Product Grid */}
         <div className="flex-1 overflow-y-auto pr-2 custom-scrollbar">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
             <AnimatePresence mode="popLayout">
@@ -160,7 +141,6 @@ const OrderPage: React.FC = () => {
         </div>
       </main>
 
-      {/* Cart Sidebar */}
       <aside className="w-96 flex flex-col bg-white rounded-3xl shadow-sm border border-slate-100 overflow-hidden">
         <div className="p-6 border-b border-slate-50 flex items-center justify-between">
           <h2 className="text-xl font-bold text-slate-800 flex items-center gap-2">
@@ -232,11 +212,12 @@ const OrderPage: React.FC = () => {
               <span className="text-orange-500">{total.toLocaleString('vi-VN')} ₫</span>
             </div>
             <Button 
-              onClick={() => navigate(ROUTES.POS_PAYMENT)}
+              onClick={handlePlaceOrder}
+              disabled={isLoading || cart.length === 0}
               className="h-14 rounded-2xl bg-orange-500 hover:bg-orange-600 text-lg font-bold shadow-lg shadow-orange-200 mt-4"
             >
-              Thanh toán
-              <ChevronRight className="ml-2 w-5 h-5" />
+              {isLoading ? 'Đang xử lý...' : 'Thanh toán'}
+              {!isLoading && <ChevronRight className="ml-2 w-5 h-5" />}
             </Button>
           </div>
         )}

@@ -56,4 +56,5 @@ export const ROUTES = {
   POS_ORDER: '/pos/order',
   POS_TABLE_MAP: '/pos/table-map',
   POS_PAYMENT: '/pos/payment',
+  POS_MANAGEMENT: '/pos/management',
 } as const;
