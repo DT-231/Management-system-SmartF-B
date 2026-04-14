@@ -1,9 +1,6 @@
-import { StaffStatus, StaffShiftType } from '../types/staff.types';
+import type { StaffStatus, StaffShiftType } from '../types/staff.types';
 
-/**
- * Extended staff data với đầy đủ thông tin cho trang Staff Manager
- * Dựa trên Module 4 Spec
- */
+
 export interface StaffDetail {
   id: string;
   fullName: string;
@@ -20,9 +17,7 @@ export interface StaffDetail {
   salary: number;
 }
 
-/**
- * Mock data cho bảng danh sách nhân viên
- */
+
 export const mockStaffList: StaffDetail[] = [
   {
     id: 'staff-1',
